@@ -1,0 +1,55 @@
+ucore_os_plus
+https://github.com/chyyuu/ucore_os_plus
+
+ucore_os_plus\ucore\src\bootloader\arch\amd64\
+
+目前主流CPU使用的64位技术：
+·AMD64：  在原始32位X86指令集的基础上加入了X86-64扩展，64位X86指令集（事实标准 x64）；
+·Intel64：Intel的扩展64bit内存技术。曾用名：EM64T，IA-32e，高度兼容AMD64。
+·IA-64：  是Intel独立开发，不兼容现有的32位软件（专用于Itanium处理器，很少见，似乎要消亡）；
+
+MinGW - 编译工具:
+安装路径不能有空格；
+ming32-base
+ming32-gcc-g++
+
+源文件后缀名指出语言种类以及后期的操作:
+.c C 源程序;预处理,编译,汇编
+.C C++源程序;预处理,编译,汇编
+.cc C++源程序;预处理,编译,汇编
+.cxx C++源程序;预处理,编译,汇编
+.m Objective-C 源程序;预处理,编译,汇编
+.i 预处理后的 C 文件;编译,汇编
+.ii 预处理后的 C++文件;编译,汇编
+.s 汇编语言源程序;汇编
+.S 汇编语言源程序;预处理,汇编
+.h 预处理器文件;通常不出现在命令行上
+
+其他后缀名的文件被传递给连接器(linker).通常包括:
+.o 目标文件(Object file)
+.a 归档库文件(Archive file)
+
+Q&A:
+bootasm.S 后缀名大写S说明文件需要预处理；
+stdint.h 是为了引入 uint32_t 等的定义；
+stdlib.h 是为了引入 size_t 的定义；
+GCC中如果文件最后不加上一行空行的话，就会冒个warning：no newline at end of file.
+调试时首先要在0x7c00处下断，断下后才可以在其他地方下断，否则断点不生效。
+调试时遇到int 15按ni也会跟进去，需要在int 15后面指令下断然后按c回车
+
+bug:
+bootasm.S 中的call bootmain 需要改为 call _bootmain，因为.c文件 GCC 编译后函数名会变为"_函数名".
+
+ucore入口点：
+
+启动扇区
+bootasm.S::start()->开启A20地址线，获取系统的内存布局 ARDS 结构，打开保护模式
+bootmain.c::bootmain(void)->
+
+Kernel 需要紧邻启动扇区
+ucore_os_plus\ucore\src\kern-ucore\arch\amd64\init\
+entry32.S::kern_entry32()->   检测cpuid的汇编变成jc试试
+entry64.S::kern_entry64()->
+
+内核初始化
+d:\P\OS\ucore_os_plus-master\ucore\src\kern-ucore\arch\amd64\init\init.c
