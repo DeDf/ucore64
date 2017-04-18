@@ -202,10 +202,10 @@ system_memory			equ     MICKEY_DATA_BASE + 0x8
 
 
    bits 16
-   
+   align 4
 mem_rangs                               dd 0
-mem_rang_buf times (20*10)              db 0
 mem_total                               dq 0
+mem_rang_buf times (20*19)              db 0
 
 ;----------------------------   
 get_system_memory:
@@ -217,7 +217,7 @@ do_e820:
 
 do_e820_loop:   
    mov eax, 0xe820
-   mov ecx, 20
+   mov ecx, 20              ; sizeof(ARDS) == 20
    mov edx, 0x534d4150      ; 'SMAP'
    int 0x15
    jc get_system_memory_failure
@@ -245,6 +245,7 @@ get_system_memory_failure:
    xor eax, eax
 
 get_system_memory_done:  
+	mov eax, 1
    ret
 
 

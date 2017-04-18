@@ -56,7 +56,7 @@ probe_memory:
     movw $0x8004, %di                               # 用来存放ARDS的缓冲区地址(Address Range Descriptor Structure)
 start_probe:
     movl $0xE820, %eax                              # 获取内存分布情况
-    movl $20, %ecx
+    movl $20, %ecx                                  # sizeof(ARDS) == 20
     movl $SMAP, %edx
     int $0x15                                       # int 0x15 ax=0xe820, 获取内存分布情况
     jnc cont                                        # 当执行int 0x15之后，CF位置位表明调用出错
