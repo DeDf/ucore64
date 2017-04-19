@@ -139,7 +139,6 @@ CMOS_INDEX_PORT         equ 0x70
    rdmsr                       ; read into edx:eax
    bts eax, 8                  ; enable long mode
    bts eax, 0                  ; enable syscall/sysret
-
    wrmsr                       ; write into EFER with edx:eax
    
    mov eax, cr4
@@ -258,7 +257,7 @@ MICKEY_DATA_SIZE     equ 144*1024*1024				; kernel data    size is 144M
 MICKEY_ROUTINE_SIZE  equ   2*1024*1024				; kernel routine size is 2M
 MICKEY_DRIVER_SIZE   equ   2*1024*1024       	; kernel driver  size is 2M
 
-MICKEY_SIZE  equ MICKEY_HEAP_SIZE + MICKEY_STACK_SIZE + MICKEY_CODE_SIZE + MICKEY_DATA_SIZE + MICKEY_ROUTINE_SIZE + MICKEY_DRIVER_SIZE
+MICKEY_SIZE  equ  MICKEY_HEAP_SIZE + MICKEY_STACK_SIZE + MICKEY_CODE_SIZE + MICKEY_DATA_SIZE + MICKEY_ROUTINE_SIZE + MICKEY_DRIVER_SIZE
 
 ;-------------------------------------------------------
 ; mickey page map base is: system_memory - MICKEY_SIZE
@@ -286,62 +285,53 @@ init_temp_page:
 
 PG_P            equ 0x01
 PG_W            equ 0x02
-PG_USER         equ 0x04
-PG_PS           equ 0x80
+PG_USER         equ 0x04    ; A user-mode access caused the fault.
+PG_PS           equ 0x80    ; PDE : 2M page
 
 ;----------  0 map to 0 --------------
 
 ; set pml4e:  pml4t[0] ---> 0x101000
-; the pdpt base is 0x101000
    mov eax, TEMP_PML4T_BASE
    mov dword [eax], 0x101000 | PG_P | PG_W | PG_USER
    mov dword [eax + 4], 0
    
 ; set pdpe:  pdpt[0] ---> 0x102000
-; the pdt base is 0x102000
    mov eax, 0x101000
    mov dword [eax], 0x102000 | PG_P | PG_W | PG_USER
    mov dword [eax + 4], 0
    
 ; set pde:  pdt[0] ---> 0x00000000 (2M-page)
-; the page base is 0x00000000, it's a 2M page
    mov eax, 0x102000
    mov dword [eax], 0 | PG_P | PG_W | PG_USER | PG_PS
    mov dword [eax + 4], 0
 
+
 ; -----  0xffff8000_00000000 map to 0x200000 -----
 
 ; set pml4e:  pml4t[0x100] ---> 0x103000
-; the pdpt base is 0x103000
    mov eax, TEMP_PML4T_BASE
    mov dword [eax + 0x100 * 8], 0x103000 | PG_P | PG_W | PG_USER
    mov dword [eax + 0x100 * 8 + 4], 0
  
 ; set pdpe:  pdpt[0] ---> 0x104000
-; the pdt base is 0x104000
    mov eax, 0x103000
    mov dword [eax], 0x104000 | PG_P | PG_W | PG_USER
    mov dword [eax+4] , 0
  
-; set pde:  pdt[0] ---> init_map_base(0x200000)
-; the page base is 0x200000, It's a 2M page
-
-init_map_base 	equ 0x200000
-
+; set pde:  pdt[0] ---> 0x200000 (2M-page)
    mov eax, 0x104000
-   mov dword [eax], init_map_base | PG_P | PG_W | PG_USER | PG_PS
+   mov dword [eax], 0x200000 | PG_P | PG_W | PG_USER | PG_PS
    mov dword [eax + 4], 0   
+
 
 ; ---- 0xffff9000_00000000 map to mickey_page_base -------
 
 ; set pml4e:  pml4t[0x120] ---> 0x105000
-; the pdpt base is 0x105000
    mov eax, TEMP_PML4T_BASE
    mov dword [eax + 0x120 * 8], 0x105000 | PG_P | PG_W | PG_USER
    mov dword [eax + 0x120 * 8 + 4], 0
 
 ; set pdpe:  pdpt[0] ---> 0x106000
-; the pdt base is 0x106000
    mov eax, 0x105000
    mov dword [eax], 0x106000 | PG_P | PG_W | PG_USER
    mov dword [eax + 4], 0
