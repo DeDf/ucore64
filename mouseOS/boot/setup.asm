@@ -185,9 +185,8 @@ system_memory			equ     MICKEY_DATA_BASE + 0x8
 ;--------------------------------------
 ; copy init to KERNEL_ENTRY
 ;--------------------------------------
-   mov rcx, qword [INIT_SEG - 8]         ; kernel size
-   
-   mov rsi, INIT_SEG                   ; kernel entry
+   mov rcx, qword [INIT_SEG - 8]      ; kernel size
+   mov rsi, INIT_SEG                  ; kernel entry
    mov rdi, MICKEY_INIT_ENTRY
    rep movsb
    
@@ -266,7 +265,7 @@ MICKEY_SIZE  equ  MICKEY_HEAP_SIZE + MICKEY_STACK_SIZE + MICKEY_CODE_SIZE + MICK
 get_mickey_page_map_base:
    mov eax, [esp + 4]
    sub eax, MICKEY_SIZE
-   and eax, 0xffe00000
+   and eax, 0xffe00000           ; page : 2M = 0x200000, 这里是去除2M以下的部分
    ret 4
 
 ;----------------------------------------------------
@@ -355,7 +354,7 @@ PHYSICAL_PAGE_TABLE_SIZE  equ     ( 10*1024*1024)         ; physical_page_table 
 
 ll:   
    mov dword [ebx * 8 + esi], eax
-   or dword [ebx * 8 + esi], PG_P | PG_W | PG_USER | PG_PS
+   or  dword [ebx * 8 + esi], PG_P | PG_W | PG_USER | PG_PS
    mov dword [ebx * 8 + esi + 4], 0
    inc ebx
    add eax, 0x200000
