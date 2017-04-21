@@ -151,37 +151,46 @@ static inline void lpt_putc(int c){}
 static void cga_putc(int c)
 {
 	// set black on white
-	if (!(c & ~0xFF)) {
+	if (!(c & ~0xFF))
+    {
 		c |= 0x0700;
 	}
 
-	switch (c & 0xff) {
+	switch (c & 0xff)
+    {
 	case '\b':
-		if (crt_pos > 0) {
+		if (crt_pos > 0)
+        {
 			crt_pos--;
 			crt_buf[crt_pos] = (c & ~0xff) | ' ';
 		}
 		break;
+
 	case '\n':
 		crt_pos += CRT_COLS;
 	case '\r':
 		crt_pos -= (crt_pos % CRT_COLS);
 		break;
+
 	default:
 		crt_buf[crt_pos++] = c;	// write the character
 		break;
 	}
 
 	// What is the purpose of this?
-	if (crt_pos >= CRT_SIZE) {
+	if (crt_pos >= CRT_SIZE)
+    {
 		int i;
 		memmove(crt_buf, crt_buf + CRT_COLS,
 			(CRT_SIZE - CRT_COLS) * sizeof(uint16_t));
-		for (i = CRT_SIZE - CRT_COLS; i < CRT_SIZE; i++) {
+
+		for (i = CRT_SIZE - CRT_COLS; i < CRT_SIZE; i++)
+        {
 			crt_buf[i] = 0x0700 | ' ';
 		}
 		crt_pos -= CRT_COLS;
 	}
+
 	// move that little blinky thing
 	outb(addr_6845, 14);
 	outb(addr_6845 + 1, crt_pos >> 8);
@@ -191,21 +200,27 @@ static void cga_putc(int c)
 
 static void serial_putc_sub(int c)
 {
+    // 若TX处于非就绪状态则delay
 	int i;
-	for (i = 0; !(inb(COM1 + COM_LSR) & COM_LSR_TXRDY) && i < 12800; i++) {
+	for (i = 0; !(inb(COM1 + COM_LSR) & COM_LSR_TXRDY) && i < 12800; i++)
+    {
 		delay();
 	}
+
 	outb(COM1 + COM_TX, c);
 }
 
 /* serial_putc - print character to serial port */
 static void serial_putc(int c)
 {
-	if (c == '\b') {
+	if (c == '\b')
+    {
 		serial_putc_sub('\b');
 		serial_putc_sub(' ');
 		serial_putc_sub('\b');
-	} else {
+	}
+    else
+    {
 		serial_putc_sub(c);
 	}
 }
@@ -368,22 +383,28 @@ static int kbd_proc_data(void)
 	uint8_t data;
 	static uint32_t shift;
 
-	if ((inb(KBSTATP) & KBS_DIB) == 0) {
+	if ((inb(KBSTATP) & KBS_DIB) == 0)
+    {
 		return -1;
 	}
 
 	data = inb(KBDATAP);
 
-	if (data == 0xE0) {
+	if (data == 0xE0)
+    {
 		// E0 escape character
 		shift |= E0ESC;
 		return 0;
-	} else if (data & 0x80) {
+	}
+    else if (data & 0x80)
+    {
 		// Key released
 		data = (shift & E0ESC ? data : data & 0x7F);
 		shift &= ~(shiftcode[data] | E0ESC);
 		return 0;
-	} else if (shift & E0ESC) {
+	}
+    else if (shift & E0ESC)
+    {
 		// Last character was an E0 escape; or with 0x80
 		data |= 0x80;
 		shift &= ~E0ESC;
@@ -399,12 +420,14 @@ static int kbd_proc_data(void)
 		else if ('A' <= c && c <= 'Z')
 			c += 'a' - 'A';
 	}
-	// Process special keys
+
 	// Ctrl-Alt-Del: reboot
-	if (!(~shift & (CTL | ALT)) && c == KEY_DEL) {
+	if (!(~shift & (CTL | ALT)) && c == KEY_DEL)
+    {
 		kprintf("Rebooting!\n");
 		outb(0x92, 0x3);	// courtesy of Chris Frost
 	}
+
 	return c;
 }
 

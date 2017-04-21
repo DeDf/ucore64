@@ -34,9 +34,11 @@ void idt_init(void)
 {
 	extern uintptr_t __vectors[];
 	int i;
-	for (i = 0; i < sizeof(idt) / sizeof(struct gatedesc); i++) {
+	for (i = 0; i < sizeof(idt) / sizeof(struct gatedesc); i++)
+    {
 		SETGATE(idt[i], 0, GD_KTEXT, __vectors[i], DPL_KERNEL);
 	}
+
 	SETGATE(idt[T_SYSCALL], 0, GD_KTEXT, __vectors[T_SYSCALL], DPL_USER);
 	SETGATE(idt[T_IPI], 0, GD_KTEXT, __vectors[T_IPI], DPL_USER);
 	SETGATE(idt[T_IPI_DOS], 0, GD_KTEXT, __vectors[T_IPI_DOS], DPL_USER);
@@ -77,6 +79,7 @@ static const char *trapname(int trapno)
 	if (trapno >= IRQ_OFFSET && trapno < IRQ_OFFSET + 16) {
 		return "Hardware Interrupt";
 	}
+
 	return "(unknown trap)";
 }
 

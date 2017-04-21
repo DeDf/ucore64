@@ -111,14 +111,12 @@ int kern_init(uint64_t mbmagic, uint64_t mbmem)
 	lapic_init();
 	numa_init();
 
-	pmm_init_numa();		// init physical memory management, numa awared
-	/* map the lapic */
-	lapic_init_late();
+	pmm_init_numa();    // init physical memory management, numa awared
+	
+	lapic_init_late();  // map the lapic
 
-	//init the acpi stuff
-
-	idt_init();		// init interrupt descriptor table
-	pic_init();		// init interrupt controller
+	idt_init();		    // init interrupt descriptor table
+	pic_init();		    // init interrupt controller
 
 //	acpi_conf_init();
 
