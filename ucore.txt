@@ -3,6 +3,8 @@ https://github.com/chyyuu/ucore_os_plus
 
 ucore_os_plus\ucore\src\bootloader\arch\amd64\
 
+I/O PORTS : http://stanislavs.org/helppc/ports.html
+
 目前主流CPU使用的64位技术：
 ·AMD64：  在原始32位X86指令集的基础上加入了X86-64扩展，64位X86指令集（事实标准 x64）；
 ·Intel64：Intel的扩展64bit内存技术。曾用名：EM64T，IA-32e，高度兼容AMD64。
