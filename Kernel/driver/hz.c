@@ -51,14 +51,19 @@ hz_init(void)
 
   // Wait until OUT bit of status byte is set
   uint64_t s = rdtsc();
-  do {
+
+  do
+  {
     outb(TIMER_MODE, TIMER_STAT0);
-    if (rdtsc() - s > 1ULL<<32) {
+    if (rdtsc() - s > 1ULL<<32)
+    {
       kprintf("inithz: PIT stuck, assuming 2GHz\n");
       cpuhz = 2 * 1000 * 1000 * 1000;
       return;
     }
-  } while (!(inb(TIMER_CNTR) & 0x80));
+  }
+  while (!(inb(TIMER_CNTR) & 0x80));
+
   uint64_t e = rdtsc();
 
   cpuhz = ((e-s)*10000000) / ((xticks*10000000)/TIMER_FREQ);
